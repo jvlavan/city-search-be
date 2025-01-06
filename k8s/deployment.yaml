@@ -2,8 +2,10 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: city-search-be
+  labels:
+    app: city-search-be
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: city-search-be
@@ -13,10 +15,31 @@ spec:
         app: city-search-be
     spec:
       containers:
-        - name: city-search-be
-          image: lavanjv/city-search-be:latest
-          ports:
-            - containerPort: 8080
+      - name: city-search-be
+        image: lavanjv/city-search-be:latest
+        ports:
+        - containerPort: 8080
+        env:
+        - name: DB_URL
+          valueFrom:
+            secretKeyRef:
+              name: city-search-be-secret
+              key: DB_URL
+        - name: DB_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: city-search-be-secret
+              key: DB_USERNAME
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: city-search-be-secret
+              key: DB_PASSWORD
+        - name: CORS_URL
+          valueFrom:
+            secretKeyRef:
+              name: city-search-be-secret
+              key: CORS_URL
 ---
 apiVersion: v1
 kind: Service
@@ -26,7 +49,7 @@ spec:
   selector:
     app: city-search-be
   ports:
-    - protocol: TCP
-      port: 80
-      targetPort: 8080
-  type: LoadBalancer
+  - protocol: TCP
+    port: 6543
+    targetPort: 8080
+  type: NodePort

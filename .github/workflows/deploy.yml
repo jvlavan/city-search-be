@@ -62,7 +62,7 @@ jobs:
         username: ${{ secrets.REMOTE_USER }}
         password: ${{ secrets.REMOTE_PASSWORD }}
         source: ./k8s/deployment.yaml
-        target: ~/k8s/deployment.yaml
+        target: ~/k8s/
 
     - name: SSH and Deploy to MicroK8s
       uses: appleboy/ssh-action@v0.1.7
@@ -74,13 +74,16 @@ jobs:
         script: |
           echo "Logging into the server..."
 
-          echo "Deleting existing k8s directory..."
+          echo "Deleting existing k8s directory if present..."
           if [ -d ~/k8s ]; then
             rm -rf ~/k8s
             echo "k8s directory deleted."
           else
-            echo "k8s directory does not exist."
+            echo "No existing k8s directory found."
           fi
+
+          echo "Recreating k8s directory and keeping deployment.yaml intact..."
+          mkdir -p ~/k8s
 
           echo "Checking for processes running on port 6543..."
           PID=$(lsof -t -i:6543 || echo "")
@@ -92,10 +95,10 @@ jobs:
           fi
 
           echo "Starting MicroK8s..."
-          sudo microk8s start || { echo "Failed to start MicroK8s."; exit 1; }
+          echo ${{ secrets.REMOTE_PASSWORD }} | sudo -S microk8s start || { echo "Failed to start MicroK8s."; exit 1; }
 
           echo "Creating Kubernetes Secret..."
-          sudo microk8s kubectl create secret generic city-search-be-secret \
+          echo ${{ secrets.REMOTE_PASSWORD }} | sudo -S microk8s kubectl create secret generic city-search-be-secret \
             --from-literal=DB_URL="${{ secrets.DB_URL }}" \
             --from-literal=DB_USERNAME="${{ secrets.DB_USERNAME }}" \
             --from-literal=DB_PASSWORD="${{ secrets.DB_PASSWORD }}" \
@@ -103,6 +106,6 @@ jobs:
             --dry-run=client -o yaml | sudo microk8s kubectl apply -f -
 
           echo "Applying Deployment..."
-          sudo microk8s kubectl apply -f ~/k8s/deployment.yaml || { echo "Failed to apply deployment."; exit 1; }
+          echo ${{ secrets.REMOTE_PASSWORD }} | sudo -S microk8s kubectl apply -f ~/k8s/deployment.yaml || { echo "Failed to apply deployment."; exit 1; }
 
           echo "Deployment completed!"

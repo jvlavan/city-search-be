@@ -74,6 +74,26 @@ jobs:
         script: |
           echo "Logging into the server..."
 
+          echo "Deleting existing k8s directory..."
+          if [ -d ~/k8s ]; then
+            rm -rf ~/k8s
+            echo "k8s directory deleted."
+          else
+            echo "k8s directory does not exist."
+          fi
+
+          echo "Checking for processes running on port 6543..."
+          PID=$(lsof -t -i:6543 || echo "")
+          if [ -n "$PID" ]; then
+            echo "Killing process with PID: $PID"
+            kill -9 $PID
+          else
+            echo "No process found running on port 6543."
+          fi
+
+          echo "Starting MicroK8s..."
+          microk8s start
+
           echo "Creating Kubernetes Secret..."
           microk8s kubectl create secret generic city-search-be-secret \
             --from-literal=DB_URL="${{ secrets.DB_URL }}" \

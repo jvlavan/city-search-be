@@ -55,6 +55,15 @@ jobs:
     - name: Checkout Code
       uses: actions/checkout@v3
 
+    - name: Copy deployment.yaml to Remote Server
+      uses: appleboy/scp-action@v0.1.6
+      with:
+        host: ${{ secrets.REMOTE_HOST }}
+        username: ${{ secrets.REMOTE_USER }}
+        password: ${{ secrets.REMOTE_PASSWORD }}
+        source: ./k8s/deployment.yaml
+        target: ~/k8s/
+
     - name: SSH and Deploy to MicroK8s
       uses: appleboy/ssh-action@v0.1.7
       with:
@@ -64,14 +73,6 @@ jobs:
         port: 22
         script: |
           echo "Logging into the server..."
-
-          # Create k8s directory if it doesn't exist
-          mkdir -p ~/k8s
-
-          echo "Copying deployment.yaml to the server..."
-          cat > ~/k8s/deployment.yaml <<EOF
-          $(cat k8s/deployment.yaml)
-          EOF
 
           echo "Creating Kubernetes Secret..."
           microk8s kubectl create secret generic city-search-be-secret \

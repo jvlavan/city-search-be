@@ -69,17 +69,15 @@ jobs:
           echo "Ensuring k8s directory exists..."
           mkdir -p ~/k8s
 
-          echo "Copying new deployment.yaml to ~/k8s..."
-          scp -o StrictHostKeyChecking=no \
-            ./k8s/deployment.yaml \
-            ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }}:~/k8s/
+          echo "Copying deployment.yaml from GitHub repo to the remote server..."
+          scp -o StrictHostKeyChecking=no ./k8s/deployment.yaml ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }}:~/k8s/
+          echo "deployment.yaml copied successfully."
 
-          # Killing any process running on port 6543
           echo "Checking for processes running on port 6543..."
           PID=$(lsof -t -i:6543)
           if [ -n "$PID" ]; then
             echo "Killing process $PID running on port 6543..."
-            sudo kill -9 $PID
+            echo ${{ secrets.REMOTE_PASSWORD }} | sudo -S kill -9 $PID
           else
             echo "No process found running on port 6543."
           fi
@@ -88,7 +86,7 @@ jobs:
           echo ${{ secrets.REMOTE_PASSWORD }} | sudo -S microk8s start
 
           echo "Creating Kubernetes Secret..."
-          sudo microk8s kubectl create secret generic city-search-be-secret \
+          echo ${{ secrets.REMOTE_PASSWORD }} | sudo -S microk8s kubectl create secret generic city-search-be-secret \
             --from-literal=DB_URL="${{ secrets.DB_URL }}" \
             --from-literal=DB_USERNAME="${{ secrets.DB_USERNAME }}" \
             --from-literal=DB_PASSWORD="${{ secrets.DB_PASSWORD }}" \
@@ -96,10 +94,10 @@ jobs:
             --dry-run=client -o yaml | sudo microk8s kubectl apply -f -
 
           echo "Applying Deployment..."
-          sudo microk8s kubectl apply -f ~/k8s/deployment.yaml
+          echo ${{ secrets.REMOTE_PASSWORD }} | sudo -S microk8s kubectl apply -f ~/k8s/deployment.yaml
 
           echo "Deployment completed!"
 
           # Running the app (assuming the deployment is successful)
           echo "Starting the application..."
-          sudo microk8s kubectl rollout restart deployment city-search-be
+          echo ${{ secrets.REMOTE_PASSWORD }} | sudo -S microk8s kubectl rollout restart deployment city-search-be

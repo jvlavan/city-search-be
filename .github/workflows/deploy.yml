@@ -52,19 +52,7 @@ jobs:
     needs: build
 
     steps:
-    - name: Checkout Code
-      uses: actions/checkout@v3
-
-    - name: Copy deployment.yaml to Remote Server
-      uses: appleboy/scp-action@v0.1.6
-      with:
-        host: ${{ secrets.REMOTE_HOST }}
-        username: ${{ secrets.REMOTE_USER }}
-        password: ${{ secrets.REMOTE_PASSWORD }}
-        source: ./k8s/deployment.yaml
-        target: ~/k8s/
-
-    - name: SSH and Deploy to MicroK8s
+    - name: SSH and Deploy to Remote MicroK8s
       uses: appleboy/ssh-action@v0.1.7
       with:
         host: ${{ secrets.REMOTE_HOST }}
@@ -74,31 +62,23 @@ jobs:
         script: |
           echo "Logging into the server..."
 
-          echo "Deleting existing k8s directory if present..."
-          if [ -d ~/k8s ]; then
-            rm -rf ~/k8s
-            echo "k8s directory deleted."
-          else
-            echo "No existing k8s directory found."
-          fi
+          echo "Deleting old deployment.yaml if it exists..."
+          rm -f ~/k8s/deployment.yaml
+          echo "Old deployment.yaml deleted."
 
-          echo "Recreating k8s directory and keeping deployment.yaml intact..."
+          echo "Ensuring k8s directory exists..."
           mkdir -p ~/k8s
 
-          echo "Checking for processes running on port 6543..."
-          PID=$(lsof -t -i:6543 || echo "")
-          if [ -n "$PID" ]; then
-            echo "Killing process with PID: $PID"
-            kill -9 $PID
-          else
-            echo "No process found running on port 6543."
-          fi
+          echo "Copying new deployment.yaml to ~/k8s..."
+          scp -o StrictHostKeyChecking=no \
+            ./k8s/deployment.yaml \
+            ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }}:~/k8s/
 
           echo "Starting MicroK8s..."
-          echo ${{ secrets.REMOTE_PASSWORD }} | sudo -S microk8s start || { echo "Failed to start MicroK8s."; exit 1; }
+          echo ${{ secrets.REMOTE_PASSWORD }} | sudo -S microk8s start
 
           echo "Creating Kubernetes Secret..."
-          echo ${{ secrets.REMOTE_PASSWORD }} | sudo -S microk8s kubectl create secret generic city-search-be-secret \
+          sudo microk8s kubectl create secret generic city-search-be-secret \
             --from-literal=DB_URL="${{ secrets.DB_URL }}" \
             --from-literal=DB_USERNAME="${{ secrets.DB_USERNAME }}" \
             --from-literal=DB_PASSWORD="${{ secrets.DB_PASSWORD }}" \
@@ -106,6 +86,6 @@ jobs:
             --dry-run=client -o yaml | sudo microk8s kubectl apply -f -
 
           echo "Applying Deployment..."
-          echo ${{ secrets.REMOTE_PASSWORD }} | sudo -S microk8s kubectl apply -f ~/k8s/deployment.yaml || { echo "Failed to apply deployment."; exit 1; }
+          sudo microk8s kubectl apply -f ~/k8s/deployment.yaml
 
           echo "Deployment completed!"

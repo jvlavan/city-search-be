@@ -42,10 +42,22 @@ jobs:
         password: ${{ secrets.DOCKER_PASSWORD }}
 
     - name: Build Docker Image
-      run: docker build -t lavanjv/city-search-be:latest .
+      run: |
+        # Get the commit ID from GitHub
+        COMMIT_ID=${GITHUB_SHA}
+        IMAGE_TAG="lavanjv/city-search-be:${COMMIT_ID}"
+
+        echo "Building Docker image with tag ${IMAGE_TAG}..."
+        docker build -t $IMAGE_TAG .
 
     - name: Push Docker Image
-      run: docker push lavanjv/city-search-be:latest
+      run: |
+        # Get the commit ID from GitHub
+        COMMIT_ID=${GITHUB_SHA}
+        IMAGE_TAG="lavanjv/city-search-be:${COMMIT_ID}"
+
+        echo "Pushing Docker image with tag ${IMAGE_TAG}..."
+        docker push $IMAGE_TAG
 
   deploy:
     runs-on: ubuntu-latest

@@ -62,7 +62,7 @@ jobs:
         username: ${{ secrets.REMOTE_USER }}
         password: ${{ secrets.REMOTE_PASSWORD }}
         source: ./k8s/deployment.yaml
-        target: ~/k8s/
+        target: ~/k8s/deployment.yaml
 
     - name: SSH and Deploy to MicroK8s
       uses: appleboy/ssh-action@v0.1.7
@@ -92,17 +92,17 @@ jobs:
           fi
 
           echo "Starting MicroK8s..."
-          microk8s start
+          sudo microk8s start || { echo "Failed to start MicroK8s."; exit 1; }
 
           echo "Creating Kubernetes Secret..."
-          microk8s kubectl create secret generic city-search-be-secret \
+          sudo microk8s kubectl create secret generic city-search-be-secret \
             --from-literal=DB_URL="${{ secrets.DB_URL }}" \
             --from-literal=DB_USERNAME="${{ secrets.DB_USERNAME }}" \
             --from-literal=DB_PASSWORD="${{ secrets.DB_PASSWORD }}" \
             --from-literal=CORS_URL="${{ secrets.CORS_URL }}" \
-            --dry-run=client -o yaml | microk8s kubectl apply -f -
+            --dry-run=client -o yaml | sudo microk8s kubectl apply -f -
 
           echo "Applying Deployment..."
-          microk8s kubectl apply -f ~/k8s/deployment.yaml
+          sudo microk8s kubectl apply -f ~/k8s/deployment.yaml || { echo "Failed to apply deployment."; exit 1; }
 
           echo "Deployment completed!"

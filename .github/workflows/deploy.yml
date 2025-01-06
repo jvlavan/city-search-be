@@ -46,18 +46,21 @@ jobs:
         # Get the commit ID from GitHub
         COMMIT_ID=${GITHUB_SHA}
         IMAGE_TAG="lavanjv/city-search-be:${COMMIT_ID}"
+        LATEST_TAG="lavanjv/city-search-be:latest"
 
-        echo "Building Docker image with tag ${IMAGE_TAG}..."
-        docker build -t $IMAGE_TAG .
+        echo "Building Docker image with tag ${IMAGE_TAG} and ${LATEST_TAG}..."
+        docker build -t $IMAGE_TAG -t $LATEST_TAG .
 
     - name: Push Docker Image
       run: |
         # Get the commit ID from GitHub
         COMMIT_ID=${GITHUB_SHA}
         IMAGE_TAG="lavanjv/city-search-be:${COMMIT_ID}"
+        LATEST_TAG="lavanjv/city-search-be:latest"
 
-        echo "Pushing Docker image with tag ${IMAGE_TAG}..."
+        echo "Pushing Docker image with tag ${IMAGE_TAG} and ${LATEST_TAG}..."
         docker push $IMAGE_TAG
+        docker push $LATEST_TAG
 
   deploy:
     runs-on: ubuntu-latest

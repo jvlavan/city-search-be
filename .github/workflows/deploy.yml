@@ -18,7 +18,7 @@ jobs:
       with:
         distribution: 'temurin'
         java-version: '21'
- 
+
     - name: Export Environment Variables
       run: |
         export DB_URL=${{ secrets.DB_URL }}
@@ -64,6 +64,24 @@ jobs:
         port: 22
         script: |
           echo "Logging into the server..."
-          cd ~/
-          microk8s kubectl apply -f deployment.yaml
+
+          # Create k8s directory if it doesn't exist
+          mkdir -p ~/k8s
+
+          echo "Copying deployment.yaml to the server..."
+          cat > ~/k8s/deployment.yaml <<EOF
+          $(cat k8s/deployment.yaml)
+          EOF
+
+          echo "Creating Kubernetes Secret..."
+          microk8s kubectl create secret generic city-search-be-secret \
+            --from-literal=DB_URL="${{ secrets.DB_URL }}" \
+            --from-literal=DB_USERNAME="${{ secrets.DB_USERNAME }}" \
+            --from-literal=DB_PASSWORD="${{ secrets.DB_PASSWORD }}" \
+            --from-literal=CORS_URL="${{ secrets.CORS_URL }}" \
+            --dry-run=client -o yaml | microk8s kubectl apply -f -
+
+          echo "Applying Deployment..."
+          microk8s kubectl apply -f ~/k8s/deployment.yaml
+
           echo "Deployment completed!"

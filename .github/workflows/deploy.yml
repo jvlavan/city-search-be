@@ -59,7 +59,7 @@ jobs:
         username: ${{ secrets.REMOTE_USER }}
         password: ${{ secrets.REMOTE_PASSWORD }}
         source: ./k8s/deployment.yaml
-        target: ~/k8s/deployment.yaml
+        target: ~/k8s/
         overwrite: true 
 
     - name: SSH and Deploy to Remote MicroK8s
@@ -73,7 +73,7 @@ jobs:
           echo "Logging into the server..."
           
           # Ensure k8s directory exists on remote server
-          mkdir -p ~/k8s
+          cat ~/k8s/deployment.yaml
 
           # Check for processes running on port 6543 and kill them
           echo "Checking for processes running on port 6543..."

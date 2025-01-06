@@ -60,7 +60,6 @@ jobs:
         password: ${{ secrets.REMOTE_PASSWORD }}
         source: ./k8s/deployment.yaml
         target: ~/k8s/
-        overwrite: true 
 
     - name: SSH and Deploy to Remote MicroK8s
       uses: appleboy/ssh-action@v0.1.7

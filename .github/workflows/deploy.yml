@@ -52,6 +52,15 @@ jobs:
     needs: build
 
     steps:
+    - name: Copy deployment.yaml to Remote Server using SCP
+      uses: appleboy/scp-action@v0.1.6
+      with:
+        host: ${{ secrets.REMOTE_HOST }}
+        username: ${{ secrets.REMOTE_USER }}
+        password: ${{ secrets.REMOTE_PASSWORD }}
+        source: ./k8s/deployment.yaml
+        target: ~/k8s/
+
     - name: SSH and Deploy to Remote MicroK8s
       uses: appleboy/ssh-action@v0.1.7
       with:
@@ -61,18 +70,11 @@ jobs:
         port: 22
         script: |
           echo "Logging into the server..."
-
-          echo "Deleting old deployment.yaml if it exists..."
-          rm -f ~/k8s/deployment.yaml
-          echo "Old deployment.yaml deleted."
-
-          echo "Ensuring k8s directory exists..."
+          
+          # Ensure k8s directory exists on remote server
           mkdir -p ~/k8s
 
-          echo "Copying deployment.yaml from GitHub repo to the remote server..."
-          scp -o StrictHostKeyChecking=no ./k8s/deployment.yaml ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }}:~/k8s/
-          echo "deployment.yaml copied successfully."
-
+          # Check for processes running on port 6543 and kill them
           echo "Checking for processes running on port 6543..."
           PID=$(lsof -t -i:6543)
           if [ -n "$PID" ]; then
@@ -82,9 +84,11 @@ jobs:
             echo "No process found running on port 6543."
           fi
 
+          # Start MicroK8s
           echo "Starting MicroK8s..."
           echo ${{ secrets.REMOTE_PASSWORD }} | sudo -S microk8s start
 
+          # Create Kubernetes Secret
           echo "Creating Kubernetes Secret..."
           echo ${{ secrets.REMOTE_PASSWORD }} | sudo -S microk8s kubectl create secret generic city-search-be-secret \
             --from-literal=DB_URL="${{ secrets.DB_URL }}" \
@@ -93,11 +97,12 @@ jobs:
             --from-literal=CORS_URL="${{ secrets.CORS_URL }}" \
             --dry-run=client -o yaml | sudo microk8s kubectl apply -f -
 
+          # Apply the Kubernetes Deployment
           echo "Applying Deployment..."
           echo ${{ secrets.REMOTE_PASSWORD }} | sudo -S microk8s kubectl apply -f ~/k8s/deployment.yaml
 
           echo "Deployment completed!"
 
-          # Running the app (assuming the deployment is successful)
+          # Restart the app (assuming the deployment was successful)
           echo "Starting the application..."
           echo ${{ secrets.REMOTE_PASSWORD }} | sudo -S microk8s kubectl rollout restart deployment city-search-be

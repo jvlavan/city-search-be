@@ -74,6 +74,16 @@ jobs:
             ./k8s/deployment.yaml \
             ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }}:~/k8s/
 
+          # Killing any process running on port 6543
+          echo "Checking for processes running on port 6543..."
+          PID=$(lsof -t -i:6543)
+          if [ -n "$PID" ]; then
+            echo "Killing process $PID running on port 6543..."
+            sudo kill -9 $PID
+          else
+            echo "No process found running on port 6543."
+          fi
+
           echo "Starting MicroK8s..."
           echo ${{ secrets.REMOTE_PASSWORD }} | sudo -S microk8s start
 
@@ -89,3 +99,7 @@ jobs:
           sudo microk8s kubectl apply -f ~/k8s/deployment.yaml
 
           echo "Deployment completed!"
+
+          # Running the app (assuming the deployment is successful)
+          echo "Starting the application..."
+          sudo microk8s kubectl rollout restart deployment city-search-be

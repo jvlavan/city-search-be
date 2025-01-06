@@ -52,4 +52,4 @@ spec:
   - protocol: TCP
     port: 6543
     targetPort: 8080
-  type: NodePort
+  type: LoadBalancer

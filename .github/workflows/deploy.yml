@@ -52,14 +52,17 @@ jobs:
     needs: build
 
     steps:
-    - name: Copy deployment.yaml to Remote Server using SCP
+    - name: Checkout Code
+      uses: actions/checkout@v3
+
+    - name: Copy deployment.yaml to Remote Server
       uses: appleboy/scp-action@v0.1.6
       with:
         host: ${{ secrets.REMOTE_HOST }}
         username: ${{ secrets.REMOTE_USER }}
         password: ${{ secrets.REMOTE_PASSWORD }}
         source: ./k8s/deployment.yaml
-        target: ~/k8s/
+        target: ~/k8s/deployment.yaml
 
     - name: SSH and Deploy to Remote MicroK8s
       uses: appleboy/ssh-action@v0.1.7

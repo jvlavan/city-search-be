@@ -64,6 +64,6 @@ jobs:
         port: 22
         script: |
           echo "Logging into the server..."
-          cd /path/to/k8s
+          cd ~/
           microk8s kubectl apply -f deployment.yaml
           echo "Deployment completed!"

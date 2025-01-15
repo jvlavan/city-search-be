@@ -25,12 +25,12 @@ public class Regions {
         @Column(nullable = false)
         String translations;
 
-        @Column(nullable = false)
+        @Column(nullable = false,name = "created_at")
                 @CreationTimestamp
-        Timestamp created_at;
+        Timestamp createdAt;
         @UpdateTimestamp
-        @Column(nullable = false)
-        Timestamp updated_at;
+        @Column(nullable = false,name = "updated_at")
+        Timestamp updatedAt;
         @Column(nullable = false)
         Integer flag;
         @Column(nullable = false,name = "wikidataid")

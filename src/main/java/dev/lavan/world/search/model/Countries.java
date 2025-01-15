@@ -60,7 +60,7 @@ public class Countries {
         BigDecimal longitude;
         @Column(nullable = false)
         String emoji;
-        @Column(nullable = false)
+        @Column(nullable = false,name = "emojiU")
         String emojiU;
         @Column(nullable = false,name="created_at")
                 @CreationTimestamp

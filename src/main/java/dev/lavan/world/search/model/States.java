@@ -58,8 +58,6 @@ public class States {
     @Column(nullable = false,name = "wikidataid")
     @JsonProperty("wikidataid")
     String wikidataid;
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name="country_id",referencedColumnName = "id")
-    Countries country;
+
 
 }

@@ -23,21 +23,21 @@ public class Cities {
     @JsonProperty("name")
     private String name;
 
-    @Column(nullable = false)
+    @Column(nullable = false,name = "state_id")
     @JsonProperty("state_id")
-    private Integer state_id;
+    private Integer stateId;
 
-    @Column(nullable = false)
+    @Column(nullable = false,name = "state_code")
     @JsonProperty("state_code")
-    private String state_code;
+    private String stateCode;
 
-    @Column(nullable = false)
+    @Column(nullable = false,name = "country_id")
     @JsonProperty("country_id")
-    private Integer country_id;
+    private Integer countryId;
 
-    @Column(nullable = false)
+    @Column(nullable = false,name = "country_code")
     @JsonProperty("country_code")
-    private String country_code;
+    private String countryCode;
 
     @Column(nullable = false)
     @JsonProperty("latitude")
@@ -47,13 +47,13 @@ public class Cities {
     @JsonProperty("longitude")
     private Float longitude;
 
-    @Column(nullable = false)
+    @Column(nullable = false,name = "created_at")
     @JsonProperty("created_at")
-    private Timestamp created_at;
+    private Timestamp createdAt;
 
-    @Column(nullable = false)
+    @Column(nullable = false,name = "updated_at")
     @JsonProperty("updated_at")
-    private Timestamp updated_at;
+    private Timestamp updatedAt;
 
     @Column(nullable = false)
     @JsonProperty("flag")

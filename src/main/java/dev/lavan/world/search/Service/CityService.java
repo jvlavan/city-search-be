@@ -19,6 +19,10 @@ public class CityService {
         System.out.printf("Fetching city with name: %s", name);
         return cityrepo.findByNameContainingIgnoreCase(name,pageable);
     }
+    public Page<Cities> findByNameAndCountryCode(String name, String CountryCode,Pageable pageable){
+        System.out.printf("Fetching city with name: %s", name);
+        return cityrepo.findByNameContainingIgnoreCaseAndCountryCodeIgnoreCase(name,CountryCode,pageable);
+    }
 
     public Optional<Cities>findById(Integer id){
         return cityrepo.findById(id);

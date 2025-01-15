@@ -24,20 +24,20 @@ public class Countries {
         String name;
         @Column(nullable = false)
         String iso3;
-        @Column(nullable = false)
-        String numeric_code;
+        @Column(nullable = false,name = "numeric_code")
+        String numericCode;
         @Column(nullable = false)
         String iso2;
         @Column(nullable = false,name = "phonecode")
-        String PhoneCode;
+        String phoneCode;
         @Column(nullable = false)
         String capital;
         @Column(nullable = false)
         String currency;
-        @Column(nullable = false)
-        String currency_name;
-        @Column(nullable = false)
-        String currency_symbol;
+        @Column(nullable = false,name = "currency_name")
+        String currencyName;
+        @Column(nullable = false,name = "currency_symbol")
+        String currencySymbol;
         @Column(nullable = false)
         String tld;
         @Column(nullable = false,name="Native")
@@ -62,12 +62,12 @@ public class Countries {
         String emoji;
         @Column(nullable = false)
         String emojiU;
-        @Column(nullable = false)
+        @Column(nullable = false,name="created_at")
                 @CreationTimestamp
-        Timestamp created_at;
-        @Column(nullable = false)
+        Timestamp createdAt;
+        @Column(nullable = false,name="updated_at")
         @UpdateTimestamp
-        Timestamp updated_at;
+        Timestamp updatedAt;
         @Column(nullable = false)
         Integer flag;
         @Column(nullable = false,name = "wikidataid")

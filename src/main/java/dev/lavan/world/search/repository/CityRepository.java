@@ -16,6 +16,6 @@ import java.util.Optional;
 @Repository
 public interface CityRepository extends JpaRepository<Cities, Integer> {
 
-
    Page<Cities> findByNameContainingIgnoreCase(String name, Pageable pageable);
+   Page<Cities> findByNameContainingIgnoreCaseAndCountryCodeIgnoreCase(String name,String countryCode,Pageable pageable);
 }

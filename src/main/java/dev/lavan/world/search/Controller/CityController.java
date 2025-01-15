@@ -37,6 +37,16 @@ public class CityController {
         headers.add("Access-Control-Expose-Headers", "X-Total-Size, X-Total-Pages, X-Current-Page");
         return ResponseEntity.ok().headers(headers).body(page.getContent());
     }
+    @GetMapping("/country/{CountryCode}/{name}")
+    public ResponseEntity<List<Cities>> getCityByNameAndCountryCode(@PathVariable String name,@PathVariable String CountryCode,Pageable pageable) {
+        Page<Cities> page = CityServiceObject.findByNameAndCountryCode(name,CountryCode, pageable);
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("X-Total-Size", String.valueOf(page.getTotalElements()));
+        headers.add("X-Total-Pages", String.valueOf(page.getTotalPages()));
+        headers.add("X-Current-Page", String.valueOf(page.getNumber()));
+        headers.add("Access-Control-Expose-Headers", "X-Total-Size, X-Total-Pages, X-Current-Page");
+        return ResponseEntity.ok().headers(headers).body(page.getContent());
+    }
 
     @GetMapping("/id/{id}")
     public Optional<Cities> getCityById(@PathVariable Integer id) {

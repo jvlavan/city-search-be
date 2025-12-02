@@ -84,7 +84,3 @@ Contributions are welcome! Please follow these steps:
 ## License
 
 This project is licensed under the [MIT License](LICENSE).
-
----
-
-Let me know if you'd like to customize any part of this README or if there's more specific information you'd like to include!
